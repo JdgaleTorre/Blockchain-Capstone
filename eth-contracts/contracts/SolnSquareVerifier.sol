@@ -35,6 +35,15 @@ contract SolnSquareVerifier is GaleDotToken {
         bytes32 indexed key
     );
 
+    function getVerifierKey(
+        uint256[2] memory a,
+        uint256[2][2] memory b,
+        uint256[2] memory c,
+        uint256[2] memory input
+    ) public pure returns (bytes32) {
+        return keccak256(abi.encodePacked(a, b, c, input));
+    }
+
     // TODO Create a function to add the solutions to the array and emit the event
     function addSolution(
         address _to,
@@ -58,12 +67,16 @@ contract SolnSquareVerifier is GaleDotToken {
         uint256[2] memory c,
         uint256[2] memory input
     ) public whenNotPaused {
-        bytes32 key = keccak256(abi.encodePacked(a, b, c, input));
+        bytes32 key = getVerifierKey(a, b, c, input);
         require(
             uniqueSolutions[key].to == address(0),
             "Solution is already used"
         );
-        Verifier.Proof memory proof = Verifier.Proof(Pairing.G1Point(a[0],a[1]), Pairing.G2Point(b[0], b[1]), Pairing.G1Point(c[0],c[1]));
+        Verifier.Proof memory proof = Verifier.Proof(
+            Pairing.G1Point(a[0], a[1]),
+            Pairing.G2Point(b[0], b[1]),
+            Pairing.G1Point(c[0], c[1])
+        );
         require(verifier.verifyTx(proof, input), "Solution is incorrect");
         addSolution(to, tokenId, key);
         super.mint(to, tokenId);

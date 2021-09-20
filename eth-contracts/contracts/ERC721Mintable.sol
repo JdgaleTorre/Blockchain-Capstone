@@ -5,6 +5,8 @@ import "openzeppelin-solidity/contracts/utils/Address.sol";
 import "openzeppelin-solidity/contracts/utils/Counters.sol";
 import "openzeppelin-solidity/contracts/utils/math/SafeMath.sol";
 import "openzeppelin-solidity/contracts/token/ERC721/IERC721Receiver.sol";
+// import "openzeppelin-solidity/contracts/token/ERC721/ERC721.sol";
+
 import "./Oraclize.sol";
 
 contract Ownable {
@@ -39,6 +41,10 @@ contract Ownable {
 
         _owner = newOwner;
         emit TransferOwnerShip(newOwner);
+    }
+
+    function getOwner() public view returns (address) {
+        return _owner;
     }
 }
 
@@ -222,7 +228,10 @@ contract ERC721 is ERC165 {
         address to,
         uint256 tokenId
     ) public {
-        require(_isApprovedOrOwner(msg.sender, tokenId));
+        require(
+            _isApprovedOrOwner(msg.sender, tokenId),
+            "Error tranfering the token."
+        );
 
         _transferFrom(from, to, tokenId);
     }
@@ -275,7 +284,7 @@ contract ERC721 is ERC165 {
 
     // @dev Internal function to mint a new token
     // TIP: remember the functions to use for Counters. you can refresh yourself with the link above
-    function _mint(address to, uint256 tokenId) internal virtual {
+    function _mint(address to, uint256 tokenId) internal {
         // TODO revert if given tokenId already exists or given address is invalid
         require(to != address(0), "Invalid address in to parameter.");
         require(!_exists(tokenId), "Token is already minted.");
@@ -292,7 +301,7 @@ contract ERC721 is ERC165 {
         address from,
         address to,
         uint256 tokenId
-    ) internal  virtual{
+    ) internal virtual {
         // TODO: require from address is the owner of the given token
         require(
             _tokenOwner[tokenId] == from,
@@ -375,6 +384,7 @@ contract ERC721Enumerable is ERC165, ERC721 {
     constructor() {
         // register the supported interface to conform to ERC721Enumerable via ERC165
         _registerInterface(_INTERFACE_ID_ERC721_ENUMERABLE);
+        // ERC721.initialize();
     }
 
     /**
@@ -431,12 +441,12 @@ contract ERC721Enumerable is ERC165, ERC721 {
     }
 
     /**
-     * @dev Internal function to mint a new token
+     * @dev Internal function to mint a new tokenonlyMinter
      * Reverts if the given token ID already exists
      * @param to address the beneficiary that will own the minted token
      * @param tokenId uint256 ID of the token to be minted
      */
-    function _mint(address to, uint256 tokenId) internal override{
+    function _mintEnumerable(address to, uint256 tokenId) internal {
         super._mint(to, tokenId);
 
         _addTokenToOwnerEnumeration(to, tokenId);
@@ -556,7 +566,7 @@ contract ERC721Metadata is ERC721Enumerable, usingOraclize {
         string memory name,
         string memory symbol,
         string memory baseTokenURI
-    )  {
+    ) {
         // TODO: set instance var values
         _name = name;
         _symbol = symbol;
@@ -583,6 +593,8 @@ contract ERC721Metadata is ERC721Enumerable, usingOraclize {
         return _tokenURIs[tokenId];
     }
 
+    // event URI(string uri);
+
     // TODO: Create an internal function to set the tokenURI of a specified tokenId
     // It should be the _baseTokenURI + the tokenId in string form
     // TIP #1: use strConcat() from the imported oraclizeAPI lib to set the complete token URI
@@ -592,7 +604,42 @@ contract ERC721Metadata is ERC721Enumerable, usingOraclize {
     function setTokenURI(uint256 tokenId) internal {
         require(_exists(tokenId));
 
-        _tokenURIs[tokenId] = strConcat(_baseTokenURI, uint2str(tokenId));
+        _tokenURIs[tokenId] = strConcat(_baseTokenURI, uint2strNew(tokenId));
+    }
+
+    function bytes32ToString(bytes32 data)
+        internal
+        pure
+        returns (string memory)
+    {
+        bytes memory bytesString = new bytes(32);
+        for (uint256 j = 0; j < 32; j++) {
+            bytes1 char = bytes1(bytes32(uint256(data) * 2**(8 * j)));
+            if (char != 0) {
+                bytesString[j] = char;
+            }
+        }
+        return string(bytesString);
+    }
+
+    function uint2strNew(uint256 _i) internal pure returns (string memory str) {
+        if (_i == 0) {
+            return "0";
+        }
+        uint256 j = _i;
+        uint256 length;
+        while (j != 0) {
+            length++;
+            j /= 10;
+        }
+        bytes memory bstr = new bytes(length);
+        uint256 k = length;
+        j = _i;
+        while (j != 0) {
+            bstr[--k] = bytes1(uint8(48 + (j % 10)));
+            j /= 10;
+        }
+        str = string(bstr);
     }
 }
 
@@ -611,10 +658,10 @@ contract GaleDotToken is
         "https://s3-us-west-2.amazonaws.com/udacity-blockchain/capstone/"
     )
 {
-    constructor(){}
+    constructor() {}
 
     function mint(address to, uint256 tokenId) public onlyOwner returns (bool) {
-        super._mint(to, tokenId);
+        super._mintEnumerable(to, tokenId);
         super.setTokenURI(tokenId);
         return true;
     }
