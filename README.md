@@ -12,3 +12,33 @@ The capstone will build upon the knowledge you have gained in the course in orde
 * [Interactive zero knowledge 3-colorability demonstration](http://web.mit.edu/~ezyang/Public/graph/svg.html)
 * [Docker](https://docs.docker.com/install/)
 * [ZoKrates](https://github.com/Zokrates/ZoKrates)
+
+
+# Contract Details
+- Name: GaleDot
+- Symbol: GOT
+- Base URL: https://s3-us-west-2.amazonaws.com/udacity-blockchain/capstone/
+- Contract Address:  0x41b0e3329Cb3E9994231253b56cFd75f2f37d6a8
+
+![Contract Image](./images/contract.png)
+
+
+# Tests
+![Tests Image](./images/Tests.png)
+
+Start Truffle by running
+
+```bash
+# For starting the development console
+truffle develop
+# truffle console
+
+# For compiling the contract, inside the development console, run:
+truffle(develop)> compile
+
+# For migrating the contract to the locally running Ethereum network, inside the development console
+truffle(develop)> migrate --reset
+
+# For running unit tests the contract, inside the development console, run:
+truffle(develop)> test
+```
