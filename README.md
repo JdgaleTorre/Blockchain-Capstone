@@ -18,7 +18,10 @@ The capstone will build upon the knowledge you have gained in the course in orde
 - Name: GaleDot
 - Symbol: GOT
 - Base URL: https://s3-us-west-2.amazonaws.com/udacity-blockchain/capstone/
-- Contract Address:  0x41b0e3329Cb3E9994231253b56cFd75f2f37d6a8
+- OpenSea MarketPlace: https://testnets.opensea.io/collection/unidentified-contract-ggb7cocsnj
+- Contract Address:
+    * SolnSquareVerifier: 0x41b0e3329Cb3E9994231253b56cFd75f2f37d6a8
+    * Verifier: 0xb343f3402eb7c04a454ebf876b104c4a636ffae6
 
 ![Contract Image](./images/contract.png)
 
@@ -42,3 +45,5 @@ truffle(develop)> migrate --reset
 # For running unit tests the contract, inside the development console, run:
 truffle(develop)> test
 ```
+
+# Open Sea Link
